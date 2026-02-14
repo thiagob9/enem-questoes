@@ -4,57 +4,33 @@ class JsonHandler{
     public function __construct() {
     }
 
-    public static function Read($path){
+    private static function Read($path){
         if(!file_exists($path)){
             ResponseHandler::Send(404, "The path doesn't exist", null);
         }
 
-        $data = json_decode(file_get_contents($path), true);
-
-        return $data ? $data : null;
+        return json_decode(file_get_contents($path), true);
     }
 
-    public static function GetQuery($amount, $subject = null, $year = null){
-        if(!intval($amount) || intval($amount) < MIN_QUESTION){
-            ResponseHandler::Send(400, 'Invalid Amount');
+    public static function GetQuery($request_body){
+        $year = intval($request_body['year']);
+        $subject = $request_body['subject'];
+        $already_done = $request_body['already_done'];
+        
+        if($year > MAX_YEAR || $year < MIN_YEAR){
+            ResponseHandler::Send(400, "Year must be between ".MIN_YEAR." and ".MAX_YEAR, null);
         }
 
-        if($subject && !in_array($subject, SUBJECTS)){
-            ResponseHandler::Send(400, 'Invalid Subject');
+        if(!in_array($subject, SUBJECTS)){
+            ResponseHandler::Send(400, "Invalid subject", null);    
         }
-
-        if(($year && !intval($year)) || 
-            intval($year) < MIN_YEAR || 
-            intval($year) > MAX_YEAR){
-            ResponseHandler::Send(400, 'Invalid Year');
-        }
-
-        $response = [];
-
-        if($subject && $year){
-            $path = BASE_URL_QUESTIONS . $year . "/questions/" . $subject . "/";
-            $questions = JsonHandler::ShowDirs($path);
-            $amountQuestions = count($questions);
-            if($amountQuestions < $amount){
-                $amount = $amountQuestions;
-            }
-
-            $chosensIndex = [];
-            for($i = 1; $i < $amount; $i++){
-                do{
-                    $index = random_int(0, $amountQuestions-1);
-                }while(in_array($index, $chosensIndex));
-                
-                array_push($chosensIndex, $index);
-
-                array_push($response, JsonHandler::Read($path . $questions[$index]."/details.json"));
-            }
-        }
-
-        return $response;
+        $dir = JsonHandler::ShowDir("../../data/{$year}/questions/{$subject}");
+        $dir_len = count($dir);
+        // DO ALREADY DONE
+        return JsonHandler::Read("../../data/{$year}/questions/{$subject}/{$dir[random_int(0, $dir_len - 1)]}/details.json");
     }
 
-    static private function ShowDirs($path){
+    public static function ShowDir($path){
         if(preg_match("/windows/i", php_uname("s"), $matchs)){
             exec("cd {$path} & dir /a:d", $output);
             return $output;

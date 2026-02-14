@@ -4,8 +4,6 @@ date_default_timezone_set('America/Sao_Paulo');
 
 define("FIRST_YEAR", 2009);
 define("LAST_YEAR", 2023);
-define("MIN_QUESTION", 1);
-define("MAX_QUESTION", 180);
 define("BASE_URL_QUESTIONS", "../../data/");
 define("SUBJECTS", [
     'matematica',
@@ -16,7 +14,16 @@ define("SUBJECTS", [
 define("MIN_YEAR", 2009);
 define("MAX_YEAR", 2023);
 
-spl_autoload_register( function($className){
+function validate_body($body, $atributes){
+    foreach($atributes as $atribute){
+        if(!isset($body[$atribute])){
+            return $atribute;
+        }
+    }
+    return false;
+}
+
+spl_autoload_register(function($className){
     $classPath = __DIR__ . '/classes/' . $className . '.php';
 
     if(file_exists($classPath)){

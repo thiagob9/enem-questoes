@@ -1,0 +1,3 @@
+curl -X POST http://localhost/enem-questoes/api/endpoint/questions.php \
+ -H "Content-Type: application/json" \
+ -d '{"year": 2009, "subject": "matematica", "already_done" : {} }'
