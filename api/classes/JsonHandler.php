@@ -21,7 +21,7 @@ class JsonHandler{
             ResponseHandler::Send(400, "Year must be between ".MIN_YEAR." and ".MAX_YEAR, null);
         }
 
-        if(!in_array($subject, SUBJECTS)){
+        if(!isset(SUBJECTS[$subject])){
             ResponseHandler::Send(400, "Invalid subject", null);    
         }
         $dir = JsonHandler::ShowDir("../../data/{$year}/questions/{$subject}");
